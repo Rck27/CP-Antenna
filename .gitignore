@@ -1,3 +1,12 @@
-Pagoda/Pagoda-*/
-QFH/QFH-*/
-Cloverleaf/Cloverleaf-*/
+Pagoda/*
+!Pagoda/*.*
+Pagoda/*/
+
+QFH/*
+!FH/*.*
+QFH/*/
+
+Cloverleaf/*
+!Cloverleaf/*.*
+Cloverleaf/*/
+
