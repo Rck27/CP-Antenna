@@ -1,0 +1,66 @@
+================================================================================
+PAGODA ANTENNA PARAMETER MAPPING & CORRECTIONS
+Based on the existing macro logic in `pagoda.bas`
+================================================================================
+
+--- PCB 1 and PCB 2 (Driven & Parasitic Elements) ---
+
+1. SUBSTRATE
+[User]: R1 outer substrate radius (PCB1 and 2)
+[Correction]: Correct. In the macro, this is calculated automatically as `pcb_r1` and `pcb_r2` (which equals `track_r1 + track_w1/2 + 0.5 mm`). It ensures a 0.5mm clearance around the outermost copper traces.
+
+2. ARC RADII & WIDTHS
+Note: The macro defines arcs using a centerline radius and a track width, rather than explicit inner/outer edges.
+
+[User]: R3 outer copper arc radius
+[Correction]: Maps to `track_r2`. This is the centerline radius of the outer arc ("oarc").
+
+[User]: R4 inner copper arc radius (outer radius)
+[User]: R5 inner copper arc radius (inner radius) (subtracting R4 and R5 gives inner arc track width)
+[Correction]: Maps to `track_r1` (centerline radius of the inner arc, "iarc").
+- R4 (outer edge) = `track_r1 + track_w1_inner / 2`
+- R5 (inner edge) = `track_r1 - track_w1_inner / 2`
+- The track width (R4 - R5) is explicitly defined in the macro as `track_w1_inner`.
+
+[User]: W4 outer arc track width
+[Correction]: Maps to `track_w1_outer`. The outer arc width is now independently controlled by W4. 
+
+3. ARC LENGTHS
+[User]: L1 outer arc length
+[Correction]: Maps to `track_c1`. This is defined as an angular span in degrees, not a linear physical length.
+
+[User]: L2 inner arc length
+[Correction]: Maps to `track_a1`. Also defined as an angular span in degrees.
+
+4. RADIAL DISTANCES / SPOKES
+[User]: W1 distance between outer and inner arc
+[Correction]: The radial distance between the centerlines of the two arcs is `track_r1 - track_r2`. The macro connects them using a radial trace (`rad1`) of width `track_w2` (which is mapped to W1).
+
+[User]: L3 copper spoke from R6 cylinder to center (feedpoint), L3 is the inner radius of the cylinder, 3 spokes from cylinder to center with track width of W1
+[Correction]: Maps to the `_spoke` traces. 
+- On PCB1, the spoke goes from the center pin (`0.0`) out to the edge of the central hole (`hole_r1`). 
+- On PCB2, the spoke goes from the coax shield pad (`coax_r2`) out to `hole_r2`. 
+- The track width of these spokes is `track_w2` (which is mapped to W1).
+
+5. CENTRAL GROUND RINGS (CYLINDERS)
+[User]: R6 copper cylinder outer radius (PCB 1 and 2)
+[Correction]: Maps to `disk_r1` and `disk_r2`. This is the outer radius of the central ground ring on the top copper layer of both boards.
+
+[User]: W2 subtracting with R6 gives inner cylinder radius
+[Correction]: The inner radius is explicitly defined as `hole_r1` and `hole_r2`. The width of this copper ring (W2) is effectively `disk_r1 - hole_r1`.
+
+6. SMA / COAX PADS
+[User]: R7 copper cylinder radius connecting with coax sleeve (PCB 2)
+[Correction]: Maps to `pcb2_sma_pad`. The outer radius of this pad is `coax_r3 + solder_w`.
+
+[User]: W3 subtracting with R7 gives inner cylinder radius (PCB 2)
+[Correction]: The inner radius of the SMA pad is exactly `coax_r2` (to avoid shorting the center pin/PTFE). The width of the pad (W3) is `(coax_r3 + solder_w) - coax_r2`.
+
+
+--- PCB 3 (Reflector Element) ---
+
+[User]: R2 outer substrate radius (PCB 3)
+[Correction]: Maps to `pcb_r3`. In the macro, it is calculated as `disk_r3 + 0.5 mm` to provide clearance.
+
+[User]: R8 copper cylinder radius (PCB 3)
+[Correction]: Maps to `disk_r3`. This is the outer radius of the solid copper reflector disk on the bottom of PCB3.

@@ -1,5 +1,8 @@
 '==============================================================================
 ' PAGODA ANTENNA - CST STUDIO SUITE MACRO (CORRECTED & FORMATTED)
+
+
+
 '==============================================================================
 Option Explicit
 
@@ -59,52 +62,123 @@ Sub Main()
     Dim ring_w As Double
     ring_w = 0.25
 
-    ' ANTENNA DIMENSIONS
-    Dim disk_r1 As Double
-    Dim disk_r2 As Double
-    Dim disk_r3 As Double
+    '--------------------------------------------------------------------------
+    ' ANTENNA TUNING PARAMETERS (Based on parameter.txt)
+    '--------------------------------------------------------------------------
+    Dim R1 As Double ' Outer substrate radius (PCB1 and 2)
+    Dim R2 As Double ' Outer substrate radius (PCB3)
+    Dim R3 As Double ' Outer copper arc radius (centerline)
+    Dim R4 As Double ' Inner copper arc outer edge radius
+    Dim R5 As Double ' Inner copper arc inner edge radius
+    Dim R6 As Double ' Central copper cylinder outer radius (PCB1 and 2)
+    Dim R7 As Double ' SMA pad outer radius (PCB2)
+    Dim R8 As Double ' Reflector disk radius (PCB3)
+
+    Dim L1 As Double ' Outer arc angular length (degrees)
+    Dim L2 As Double ' Inner arc angular length (degrees)
+    Dim L3 As Double ' Inner radius of the central cylinder (hole)
+
+    Dim W1 As Double ' Track width of the radial spokes
+    Dim W2 As Double ' Width of the central copper cylinder
+    Dim W3 As Double ' Width of the SMA pad on PCB2
+    Dim W4 As Double ' Outer arc track width
+
     Dim disk_d1 As Double
     Dim disk_d2 As Double
-    Dim track_r1 As Double
-    Dim track_r2 As Double
-    Dim track_w1 As Double
-    Dim track_w2 As Double
-    Dim track_a1 As Double
-    Dim track_c1 As Double
-    Dim hole_r1 As Double
-    Dim hole_r2 As Double
 
     If VER = "3" Then
-        disk_r1 = 5.1539 * sc
-        disk_r2 = 5.1539 * sc
-        disk_r3 = 5.6459 * sc
-        disk_d1 = 3.6526 * sc
-        disk_d2 = 12.4514 * sc
-        track_r1 = 10.2313 * sc
-        track_r2 = 8.6079 * sc
-        track_w1 = 1.0 * sc
-        track_w2 = 1.0 * sc
-        track_a1 = 71.7938
-        track_c1 = 17.49
-        hole_r1 = 2.3863 * sc
-        hole_r2 = 2.3863 * sc
+        ' Base values for Version 3 (Scaled by sc)
+        R4 = 9 * sc
+        R5 = 8  * sc
+        R3 = 10.9  * sc
+        
+        W4 = 0.9 * sc
+        W1 = 1.0 * sc
+
+        L1 = 8.74
+        L2 = 5
+
+        R6 = 6.9 * sc
+        W2 = R6 - (2.75 * sc) ' Set width explicitly
+        L3 = R6 - W2            ' Inner radius derived from R6 and W2
+
+        R8 = 4.5 * sc
+
+        R1 = R4 + 0.5 * sc
+        R2 = R8 + 0.5 * sc
+        
+        R7 = coax_r3 + solder_w
+        W3 = R7 - coax_r2       ' Set width explicitly
+
+        disk_d1 = 2.7 * sc
+        disk_d2 = 4.5 * sc
+
     ElseIf VER = "3B" Then
-        disk_r1 = 5.5849 * sc
-        disk_r2 = 5.5849 * sc
-        disk_r3 = 5.6459 * sc
+        ' Base values for Version 3B
+        R4 = 10.7313 * sc
+        R5 = 9.7313  * sc
+        
+        R6 = 5.5849 * sc
+        W2 = R6 - (2.4297 * sc) ' Set width explicitly
+        L3 = R6 - W2            ' Inner radius derived from R6 and W2
+        
+        R3 = ((R4 + R5)/2.0 + R6 - 0.5 / 2.0) / 2.0
+        
+        W4 = 1.0 * sc
+        W1 = 1.0 * sc
+
+        L1 = 19.1231
+        L2 = 69.1855
+
+        R8 = 5.6459 * sc
+
+        R1 = R4 + 0.5 * sc
+        R2 = R8 + 0.5 * sc
+        
+        R7 = coax_r3 + solder_w
+        W3 = R7 - coax_r2       ' Set width explicitly
+
         disk_d1 = 3.6526 * sc
         disk_d2 = 12.4514 * sc
-        track_r1 = 10.2313 * sc
-        track_r2 = (track_r1 + disk_r2 - 0.5 / 2.0) / 2.0
-        track_w1 = 1.0 * sc
-        track_w2 = 1.0 * sc
-        track_a1 = 69.1855
-        track_c1 = 19.1231
-        hole_r1 = 2.4297 * sc
-        hole_r2 = 2.4297 * sc
     Else
         Exit Sub
     End If
+
+    '--------------------------------------------------------------------------
+    ' MAP TUNING PARAMETERS TO INTERNAL MACRO VARIABLES
+    '--------------------------------------------------------------------------
+    Dim track_r1 As Double
+ track_r1 = (R4 + R5) / 2.0
+    Dim track_w1_inner As Double
+ track_w1_inner = R4 - R5
+    Dim track_w1_outer As Double
+ track_w1_outer = W4
+    Dim track_r2 As Double
+ track_r2 = R3
+    Dim track_w2 As Double
+ track_w2 = W1
+    Dim track_a1 As Double
+ track_a1 = L2
+    Dim track_c1 As Double
+ track_c1 = L1
+    
+    Dim disk_r1 As Double
+ disk_r1 = R6
+    Dim disk_r2 As Double
+ disk_r2 = R6
+    Dim hole_r1 As Double
+ hole_r1 = L3
+    Dim hole_r2 As Double
+ hole_r2 = L3
+    Dim disk_r3 As Double
+ disk_r3 = R8
+
+    Dim pcb_r1 As Double
+ pcb_r1 = R1
+    Dim pcb_r2 As Double
+ pcb_r2 = R1
+    Dim pcb_r3 As Double
+ pcb_r3 = R2
 
     ' FIXED MECHANICAL
     Dim pcb_th As Double
@@ -115,15 +189,6 @@ Sub Main()
 
     Dim track_b1 As Double
     track_b1 = -track_c1 / 2.0
-
-    Dim pcb_r1 As Double
-    pcb_r1 = track_r1 + track_w1 / 2.0 + 0.5
-
-    Dim pcb_r2 As Double
-    pcb_r2 = track_r1 + track_w1 / 2.0 + 0.5
-
-    Dim pcb_r3 As Double
-    pcb_r3 = disk_r3 + 0.5
 
     ' Z STACK
     Dim z3_bot As Double
@@ -185,12 +250,12 @@ Sub Main()
         base_ang = 90.0 + arm * 120.0
 
         If POL = "LHCP" Then
-            a1 = base_ang + track_b1 - (track_w2 - track_w1) / 2.0 / track_r1 * (180.0 / PI)
+            a1 = base_ang + track_b1 - (track_w2 - track_w1_inner) / 2.0 / track_r1 * (180.0 / PI)
             a2 = a1 + track_a1
             a3 = base_ang + track_b1
             a4 = base_ang + track_b1 + track_c1
         Else
-            a1 = base_ang - track_b1 + (track_w2 - track_w1) / 2.0 / track_r1 * (180.0 / PI)
+            a1 = base_ang - track_b1 + (track_w2 - track_w1_inner) / 2.0 / track_r1 * (180.0 / PI)
             a2 = a1 - track_a1
             a3 = base_ang - track_b1
             a4 = base_ang - track_b1 - track_c1
@@ -199,8 +264,8 @@ Sub Main()
         a5 = base_ang + 60.0
         pfx = "pcb1_arm" & (arm + 1)
 
-        Call BuildArcTrace(pfx & "_iarc", "PCB1_CopperTop", 0, 0, cu_top1, track_r1, a1, a2, track_w1, cu_th)
-        Call BuildArcTrace(pfx & "_oarc", "PCB1_CopperTop", 0, 0, cu_top1, track_r2, a3, a4, track_w1, cu_th)
+        Call BuildArcTrace(pfx & "_iarc", "PCB1_CopperTop", 0, 0, cu_top1, track_r1, a1, a2, track_w1_inner, cu_th)
+        Call BuildArcTrace(pfx & "_oarc", "PCB1_CopperTop", 0, 0, cu_top1, track_r2, a3, a4, track_w1_outer, cu_th)
         Call BuildRadialTrace(pfx & "_rad1", "PCB1_CopperTop", 0, 0, cu_top1, track_r2, track_r1, a3, track_w2, cu_th)
         Call BuildRadialTrace(pfx & "_rad2", "PCB1_CopperTop", 0, 0, cu_top1, track_r2, disk_r1, a4, track_w2, cu_th)
 
@@ -216,19 +281,20 @@ Sub Main()
 
     Call BuildCopperRing("pcb2_gndring", "PCB2_CopperTop", 0, 0, cu_top2, hole_r2, disk_r2, cu_th)
 
-    ' FIX: Start pad exactly at coax_r2 to fully overlap and connect to coax_shield
-    Call BuildCopperRing("pcb2_sma_pad", "PCB2_CopperTop", 0, 0, cu_top2, coax_r2, coax_r3 + solder_w, cu_th)
+    ' FIX: Start pad inner edge is derived from W3 (R7 - W3) and outer edge is R7.
+    ' Note: Normally R7 - W3 = coax_r2 to avoid shorting, but we use the tuning parameter directly here.
+    Call BuildCopperRing("pcb2_sma_pad", "PCB2_CopperTop", 0, 0, cu_top2, R7 - W3, R7, cu_th)
 
     For arm = 0 To 2
         base_ang = 90.0 + arm * 120.0
 
         If POL = "LHCP" Then
-            a1 = base_ang - track_b1 + (track_w2 - track_w1) / 2.0 / track_r1 * (180.0 / PI)
+            a1 = base_ang - track_b1 + (track_w2 - track_w1_inner) / 2.0 / track_r1 * (180.0 / PI)
             a2 = a1 - track_a1
             a3 = base_ang - track_b1
             a4 = base_ang - track_b1 - track_c1
         Else
-            a1 = base_ang + track_b1 - (track_w2 - track_w1) / 2.0 / track_r1 * (180.0 / PI)
+            a1 = base_ang + track_b1 - (track_w2 - track_w1_inner) / 2.0 / track_r1 * (180.0 / PI)
             a2 = a1 + track_a1
             a3 = base_ang + track_b1
             a4 = base_ang + track_b1 + track_c1
@@ -237,13 +303,13 @@ Sub Main()
         a5 = base_ang + 60.0
         pfx = "pcb2_arm" & (arm + 1)
 
-        Call BuildArcTrace(pfx & "_iarc", "PCB2_CopperTop", 0, 0, cu_top2, track_r1, a1, a2, track_w1, cu_th)
-        Call BuildArcTrace(pfx & "_oarc", "PCB2_CopperTop", 0, 0, cu_top2, track_r2, a3, a4, track_w1, cu_th)
+        Call BuildArcTrace(pfx & "_iarc", "PCB2_CopperTop", 0, 0, cu_top2, track_r1, a1, a2, track_w1_inner, cu_th)
+        Call BuildArcTrace(pfx & "_oarc", "PCB2_CopperTop", 0, 0, cu_top2, track_r2, a3, a4, track_w1_outer, cu_th)
         Call BuildRadialTrace(pfx & "_rad1", "PCB2_CopperTop", 0, 0, cu_top2, track_r2, track_r1, a3, track_w2, cu_th)
         Call BuildRadialTrace(pfx & "_rad2", "PCB2_CopperTop", 0, 0, cu_top2, track_r2, disk_r2, a4, track_w2, cu_th)
 
-        ' FIX: Ensure spoke reaches the coax shield (coax_r2) to prevent open circuit
-        Call BuildRadialTrace(pfx & "_spoke", "PCB2_CopperTop", 0, 0, cu_top2, coax_r2, hole_r2, a5, track_w2, cu_th)
+        ' FIX: Ensure spoke reaches the inner edge of the SMA pad (R7 - W3) to prevent open circuit
+        Call BuildRadialTrace(pfx & "_spoke", "PCB2_CopperTop", 0, 0, cu_top2, R7 - W3, hole_r2, a5, track_w2, cu_th)
     Next arm
 
     '--------------------------------------------------------------------------
@@ -253,7 +319,7 @@ Sub Main()
     cu_bot3 = z3_bot - cu_th
 
     ' FIX: Used BuildCopperRing instead of BuildSolidDisk to allow center pin to pass without shorting
-    Call BuildCopperRing("pcb3_reflector", "PCB3_CopperBot", 0, 0, cu_bot3, coax_r2, disk_r3, cu_th)
+    Call BuildCopperRing("pcb3_reflector", "PCB3_CopperBot", 0, 0, cu_bot3, coax_r2, R8, cu_th)
 
     '--------------------------------------------------------------------------
     ' COAXIAL FEED STUB
